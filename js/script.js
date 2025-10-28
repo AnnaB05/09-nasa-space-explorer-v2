@@ -108,17 +108,21 @@ function openModal({ mediaType, src, title, date, explanation }) {
 				mediaWrap.appendChild(modalPlay);
 
 				// Watch button (opens new tab)
-				const actions = document.createElement('div');
-				actions.className = 'video-actions';
-				const watchUrl = makeWatchUrl(src);
-				const openBtn = document.createElement('a');
-				openBtn.className = 'watch-btn';
-				openBtn.href = watchUrl || src;
-				openBtn.target = '_blank';
-				openBtn.rel = 'noopener noreferrer';
-				openBtn.textContent = 'Watch on YouTube';
-				actions.appendChild(openBtn);
-				mediaWrap.appendChild(actions);
+					const watchUrl = makeWatchUrl(src);
+					// Only show a Watch button if no thumbnail is available —
+					// when a thumbnail exists the user can click it to open YouTube.
+					if (!finalThumb) {
+						const actions = document.createElement('div');
+						actions.className = 'video-actions';
+						const openBtn = document.createElement('a');
+						openBtn.className = 'watch-btn';
+						openBtn.href = watchUrl || src;
+						openBtn.target = '_blank';
+						openBtn.rel = 'noopener noreferrer';
+						openBtn.textContent = 'Watch on YouTube';
+						actions.appendChild(openBtn);
+						mediaWrap.appendChild(actions);
+					}
 
 				// Also open when clicking the thumbnail or play overlay
 				function openExternal() {
@@ -282,5 +286,12 @@ async function fetchAndShow() {
 // Attach event
 getImageBtn.addEventListener('click', fetchAndShow);
 
-// Also show a random fact when page first loads
-document.addEventListener('DOMContentLoaded', showRandomFact);
+// show a random fact when page first loads.
+// If the script is loaded after DOMContentLoaded (script tag at end of body), the event
+// may have already fired — handle both cases so the fact appears on every page load.
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', showRandomFact);
+} else {
+	// DOM already ready
+	showRandomFact();
+}
